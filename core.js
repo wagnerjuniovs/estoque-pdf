@@ -129,7 +129,6 @@
     for (let i = 1; i <= pages; i++) {
       doc.setPage(i); doc.setDrawColor(216, 224, 213); doc.setLineWidth(.2); doc.line(left, height - 12, width - right, height - 12);
       doc.setFont('helvetica', 'normal'); doc.setFontSize(7); doc.setTextColor(112, 125, 108);
-      doc.text('ESTOQUE  /  Código · Descrição · Quantidade · Cor · Depósito', left, height - 7);
       doc.text(`Página ${i} de ${pages}`, width - right, height - 7, { align: 'right' });
     }
     return doc;
