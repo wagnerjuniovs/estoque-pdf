@@ -57,12 +57,13 @@
     const range = root.XLSX.utils.decode_range(sheet['!ref']);
     const rows = [];
     const warnings = [];
-    let blankRows = 0, repeatedHeaders = 0, totalRows = 0, missingQuantities = 0, incompleteRows = 0;
+    let blankRows = 0, repeatedHeaders = 0, totalRows = 0, developmentRows = 0, missingQuantities = 0, incompleteRows = 0;
     for (let r = header + 1; r <= range.e.r; r++) {
       const cells = Array.from({ length: 5 }, (_, c) => sheet[root.XLSX.utils.encode_cell({ r, c })]);
       const values = cells.map(cellText);
       if (values.every(v => !v)) { blankRows++; continue; }
       if (isHeader(values)) { repeatedHeaders++; continue; }
+      if (clean(values[1]).toLocaleLowerCase('pt-BR').includes('desenvolvimento')) { developmentRows++; continue; }
       // Totais de exportação são descartados apenas quando claramente identificados.
       const totalLabels = ['total', 'totalgeral', 'subtotal', 'totais'];
       const totalLabel = values[0] || values[1];
@@ -77,10 +78,10 @@
       if ([0, 1, 3, 4].some(i => !values[i])) incompleteRows++;
       rows.push({ code: values[0], description: values[1], quantity: qty.number, quantityText: qty.text, color: values[3], warehouse: values[4], sourceRow: r + 1 });
     }
-    if (!rows.length) throw new Error('A aba tem cabeçalhos, mas não há produtos nas colunas A a E.');
+    if (!rows.length) throw new Error(developmentRows ? 'Todos os produtos desta aba foram excluídos porque a descrição contém “desenvolvimento”. Não há itens para gerar o PDF.' : 'A aba tem cabeçalhos, mas não há produtos nas colunas A a E.');
     if (missingQuantities) warnings.push(`${missingQuantities} linha(s) sem quantidade: o PDF mostra um traço, sem transformar campos vazios em zero.`);
     if (incompleteRows) warnings.push(`${incompleteRows} linha(s) com código, descrição, cor ou depósito vazio: os registros foram mantidos e os campos vazios aparecem como traço.`);
-    return { rows, warnings, cleanup: { blankRows, repeatedHeaders, totalRows }, sheetName };
+    return { rows, warnings, cleanup: { blankRows, repeatedHeaders, totalRows, developmentRows }, sheetName };
   }
   function parseWorkbook(data, name) {
     const extension = name.toLowerCase().split('.').pop();
@@ -103,7 +104,6 @@
     const width = doc.internal.pageSize.getWidth();
     const height = doc.internal.pageSize.getHeight();
     const left = 12, right = 12;
-    const source = clean(sourceName) + '  |  Aba: ' + clean(report.sheetName);
     doc.autoTable({
       head: [LABELS],
       body: report.rows.map(row => [row.code || '—', row.description || '—', row.quantityText, row.color || '—', row.warehouse || '—']),
@@ -121,9 +121,6 @@
         doc.setFillColor(82, 120, 73); doc.rect(left, 11, 11, 1.3, 'F');
         doc.setFont('helvetica', 'bold'); doc.setFontSize(19); doc.setTextColor(23, 47, 43); doc.text('Relatório de estoque', left, 22);
         doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(106, 119, 106);
-        const sourceLines = doc.splitTextToSize(source, 176);
-        // Metadados limitados a duas linhas; descrições dos produtos nunca são truncadas.
-        doc.text(sourceLines.slice(0, 2), left, 28);
         doc.text('Gerado em ' + stamp, width - right, 17, { align: 'right' });
         doc.text(numberFormat.format(report.rows.length) + ' registros de estoque', width - right, 23, { align: 'right' });
       }

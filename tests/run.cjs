@@ -57,10 +57,29 @@ async function pdfText(filename) {
       for (const code of ['003627','009928','016140']) assert(result.text.includes(code));
       for (const excluded of ['1234567926438','61179000','Custo','preco_com']) assert(!result.text.includes(excluded));
       assert(result.text.includes('4.730')); assert(result.text.includes('Depósito'));
+      assert(!result.text.includes('teste.xlsx')); assert(!result.text.includes('Plan1')); assert(!result.text.includes('Aba:'));
       assert.equal(await page.locator('#preview-body tr').count(), 3);
       await page.screenshot({ path: path.join(artifacts,'site-com-estoque.png'), fullPage:true });
       pass('planilha original: 3 produtos, códigos preservados, apenas A–E no PDF');
     }
+    const excludedProducts = [
+      ['008621','DESENVOLVIMENTO VESTUARIO MODELO SIMPLES',27,'NAO APLICAVEL','EXCEDENTES'],
+      ['008626','DESENVOLVIMENTO VESTUARIO MODELO JQD',5,'NAO APLICAVEL','EXCEDENTES'],
+      ['008627','Produto em DeSeNvOlViMeNtO interno','erro','Cor','Depósito']
+    ];
+    const filtered = await upload(fixture('exclusao.xlsx',book([header,...excludedProducts,...products]),'xlsx'));
+    for (const code of ['008621','008626','008627']) assert(!filtered.text.includes(code));
+    for (const code of ['003627','009928','016140']) assert(filtered.text.includes(code));
+    assert(!filtered.text.toLowerCase().includes('desenvolvimento'));
+    assert(!filtered.text.includes('exclusao.xlsx')); assert(!filtered.text.includes('Aba:'));
+    assert.equal(await page.locator('#preview-body tr').count(),3);
+    assert((await page.locator('#status').textContent()).includes('3 item(ns)'));
+    pass('exclusão integral por descrição, em qualquer posição e caixa; sem nome de arquivo ou aba');
+    await page.locator('#file-input').setInputFiles(fixture('todos-excluidos.xlsx',book([header,...excludedProducts]),'xlsx'));
+    await page.waitForFunction(()=>document.querySelector('#status').classList.contains('error'));
+    assert.equal(await page.locator('#result').isVisible(),false);
+    assert((await page.locator('#status').textContent()).includes('Todos os produtos'));
+    pass('todos os itens excluídos: informa ausência de produtos e remove PDF anterior');
     for (const type of ['xlsx','xls','xlsb','ods','csv']) {
       const f = fixture('formato.'+type,book([header,...products]),type === 'xls' ? 'biff8' : type);
       const result = await upload(f);

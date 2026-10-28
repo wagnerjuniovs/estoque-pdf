@@ -44,7 +44,8 @@
       download.download = `estoque-${base}.pdf`;
       render(report);
       const cleaned = report.cleanup.blankRows + report.cleanup.repeatedHeaders + report.cleanup.totalRows;
-      message(`PDF pronto! ${StockPDF.numberFormat.format(report.rows.length)} registros organizados.${cleaned ? ' Linhas vazias, cabeçalhos repetidos e totais de rodapé foram desconsiderados quando identificados.' : ''} Se o download não começar, use “Baixar PDF”.`);
+      const excluded = report.cleanup.developmentRows;
+      message(`PDF pronto! ${StockPDF.numberFormat.format(report.rows.length)} registros organizados.${excluded ? ` ${excluded} item(ns) com “desenvolvimento” na descrição foram excluídos.` : ''}${cleaned ? ' Linhas vazias, cabeçalhos repetidos e totais de rodapé foram desconsiderados quando identificados.' : ''} Se o download não começar, use “Baixar PDF”.`);
       if (autoDownload) download.click();
     } catch (error) {
       clearPdf(); message(error.message || 'Não foi possível gerar o PDF. Verifique o arquivo e tente novamente.', 'error');

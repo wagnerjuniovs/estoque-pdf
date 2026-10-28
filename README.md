@@ -32,13 +32,14 @@ Se usar outro nome de repositório, o último trecho do endereço muda. A hosped
 - Identifica os cabeçalhos nas primeiras 200 linhas usadas de cada aba. As cinco colunas devem estar em **A a E**, na ordem descrita acima. Aceita variações como acentos, `Quantidade`, `Cor` e `Depósito`.
 - Uma aba de estoque identificada gera o PDF automaticamente. Se houver mais de uma, pede a escolha da aba, para que nenhum estoque seja omitido sem aviso. Cada PDF corresponde à aba selecionada.
 - Mantém a ordem dos registros. Não agrupa, não deduplica e não soma produtos de depósitos diferentes.
+- Exclui a linha inteira quando a descrição (coluna B) contém `desenvolvimento`, em qualquer posição e sem diferenciar maiúsculas de minúsculas. Esses itens não aparecem na prévia, na contagem nem no PDF. Se todos forem excluídos, informa que não há itens para gerar o relatório.
 - Ignora linhas sem dados em A–E, cabeçalhos repetidos e linhas explicitamente identificadas como total/subtotal sem produto, cor ou depósito. As demais colunas são desconsideradas.
 - Preserva códigos em texto e zeros definidos por máscara numérica. Zeros já perdidos no arquivo de origem não podem ser reconstruídos sem conhecer o padrão.
 - Remove espaços excedentes e quebras de linha de preenchimento. Descrições dos produtos são quebradas em várias linhas no PDF, sem corte.
 - Quantidades numéricas do Excel mantêm seu valor. Quantidades em texto seguem convenção brasileira: `1.234,50` → `1.234,5`, `1.234` → `1.234`. Decimal textual com ponto e sem agrupamento também é reconhecido, como `12.5`. CSV de outra convenção com valores ambíguos deve ser exportado como Excel numérico.
 - Valores vazios aparecem como traço, sem serem convertidos em zero. Saldo zero e negativo são mantidos. Quantidade não numérica ou erro de célula bloqueia a geração e informa a linha.
 - Fórmulas usam o resultado salvo no arquivo. O site não recalcula fórmulas; salve antes no Excel/LibreOffice quando necessário.
-- PDF A4 horizontal, texto selecionável, faixas discretas entre linhas, cabeçalho em todas as páginas e rodapé com página atual/total. Os cinco campos são os únicos dados de produtos incluídos. A fonte de origem, aba e horário de geração aparecem como identificação do relatório.
+- PDF A4 horizontal, texto selecionável, faixas discretas entre linhas, cabeçalho em todas as páginas e rodapé com página atual/total. Os cinco campos são os únicos dados de produtos incluídos. O horário de geração identifica o relatório; nome do arquivo e da aba não aparecem no PDF.
 - Prévia na tela limitada a 100 registros. **O PDF inclui todos os registros válidos da aba**.
 
 ## Arquivos
