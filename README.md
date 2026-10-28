@@ -68,4 +68,3 @@ O teste usa Edge em modo headless, cria arquivos sintéticos em `artifacts/` e v
 - jsPDF-AutoTable 5.0.9 — MIT. [Projeto](https://github.com/simonbengtsson/jsPDF-AutoTable).
 
 Licenças incluídas na pasta `vendor`. Não é necessário contratar nenhum serviço para usar o site.
-
